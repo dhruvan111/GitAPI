@@ -4,13 +4,14 @@ import com.example.model.GitRepository;
 import com.example.service.GitHubService;
 import com.example.service.MongoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/repo")
+@RequestMapping("/api/repo")
 public class GitHubController {
 
     private final GitHubService gitHubService;
@@ -22,18 +23,15 @@ public class GitHubController {
         this.mongoService = mongoService;
     }
 
-    @GetMapping("/public/api")
-    public String function(){
-        return "Public api";
-    }
-
     // GitHub API call operations
-    @GetMapping("/protected/git/{owner}")
+    @GetMapping("/git/{owner}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<GitRepository> getRepositories(@PathVariable String owner) throws IOException {
         return gitHubService.getRepositories(owner);
     }
 
-    @PostMapping("/protected/git/publish")
+    @PostMapping("/git/publish")
+    @PreAuthorize("hasRole('ADMIN')")
     public GitRepository publishRepository(@RequestBody GitRepository request) {
         try {
             return gitHubService.publishRepository(request.getOwner(), request.getName(), request.getDescription());
@@ -44,27 +42,32 @@ public class GitHubController {
     }
 
     // Database operations
-    @GetMapping("/protected/all")
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<GitRepository> getAllRepoFromDB(){
         return gitHubService.getRepoFromDB();
     }
 
-    @GetMapping("/protected/searchByKey/{keyword}")
+    @GetMapping("/searchByKey/{keyword}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<GitRepository> searchRepositories(@PathVariable String keyword) {
         return mongoService.findRepoByKey(keyword);
     }
 
-    @GetMapping("/protected/searchByUser/{username}")
+    @GetMapping("/searchByUser/{username}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<GitRepository> searchRepoByUser(@PathVariable String username){
         return mongoService.findRepoByUser(username);
     }
 
-    @GetMapping("/protected/delete/{owner}")
+    @GetMapping("/delete/{owner}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<GitRepository> deleteRepositories(@PathVariable String owner){
         return mongoService.deleteRepoByName(owner);
     }
 
-    @GetMapping("/protected/sort")
+    @GetMapping("/sortById")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public List<GitRepository> sortById(){
         return mongoService.sortRepo();
     }

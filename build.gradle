@@ -20,10 +20,13 @@ dependencies {
 	implementation 'org.json:json:20220320'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7.1'
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
+	implementation 'com.javiersc.logger:logger-jvm:0.12.0'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '3.0.2'
+	implementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
+	implementation "org.glassfish.jaxb:jaxb-runtime:2.3.2"
 
 	compileOnly 'org.projectlombok:lombok:1.18.28'
 	annotationProcessor 'org.projectlombok:lombok:1.18.28'
