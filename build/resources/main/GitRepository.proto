@@ -1,7 +1,5 @@
 syntax = "proto3";
 
-package GitData;
-
 message GitRepo{
   int64 id = 1;
   string owner = 2;
