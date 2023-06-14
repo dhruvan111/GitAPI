@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.model.GitRepository;
+import model.GitRepo;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
@@ -49,23 +50,26 @@ public class GitHubService {
         return repositories;
     }
 
-    public List<GitRepository> parsingResponse(List<GHRepository> repositories){
-        List<GitRepository> gitRepositoryList = new ArrayList<>();
+    public List<GitRepo> parsingResponse(List<GHRepository> repositories){
+        List<GitRepo> gitRepoList = new ArrayList<>();
 
         for (GHRepository repo : repositories) {
-            GitRepository gitRepository;
-            gitRepository = modelMapper.map(repo, GitRepository.class);
-            gitRepositoryList.add(gitRepository);
+            GitRepo gitRepo = GitRepo.newBuilder()
+                    .setId(repo.getId())
+                    .setOwner(repo.getOwnerName())
+                    .setName(repo.getName())
+                    .setDescription(repo.getDescription()).build();
+            gitRepoList.add(gitRepo);
         }
-        return gitRepositoryList;
+        return gitRepoList;
     }
 
-    public List<GitRepository> getRepositories(String user) throws IOException {
+    public List<GitRepo> getRepositories(String user) throws IOException {
 
         List<GHRepository> repositories = fetchRepoFromGit(user);
-        List<GitRepository> gitRepositoryList = parsingResponse(repositories);
-        gitRepositoryList.forEach(mongoTemplate::save);
-        return gitRepositoryList;
+        List<GitRepo> gitRepoList = parsingResponse(repositories);
+        gitRepoList.forEach(mongoTemplate::save);
+        return gitRepoList;
     }
 
     public GitRepository publishRepository(String owner, String repoName, String description) throws IOException {
