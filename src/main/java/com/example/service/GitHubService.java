@@ -1,6 +1,7 @@
 package com.example.service;
 
 import com.example.model.GitRepository;
+import model.GitRepo;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
@@ -9,10 +10,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Fields;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -49,23 +55,44 @@ public class GitHubService {
         return repositories;
     }
 
-    public List<GitRepository> parsingResponse(List<GHRepository> repositories){
-        List<GitRepository> gitRepositoryList = new ArrayList<>();
+    public List<GitRepo> parsingResponse(List<GHRepository> repositories) throws IllegalAccessException {
+        List<GitRepo> gitRepoList = new ArrayList<>();
 
-        for (GHRepository repo : repositories) {
-            GitRepository gitRepository;
-            gitRepository = modelMapper.map(repo, GitRepository.class);
-            gitRepositoryList.add(gitRepository);
+        for (GHRepository repo:repositories){
+            GitRepo.Builder gitRepoBuilder = GitRepo.newBuilder();
+            gitRepoBuilder.setId(repo.getId());
+
+            if (repo.getOwnerName() != null) {
+                gitRepoBuilder.setOwner(repo.getOwnerName());
+            }
+
+            if (repo.getName() != null) {
+                gitRepoBuilder.setName(repo.getName());
+            }
+
+            if (repo.getDescription() != null) {
+                gitRepoBuilder.setDescription(repo.getDescription());
+            }
+
+            GitRepo gitRepo = gitRepoBuilder.build();
+            gitRepoList.add(gitRepo);
         }
-        return gitRepositoryList;
+        return gitRepoList;
     }
 
-    public List<GitRepository> getRepositories(String user) throws IOException {
-
+    public List<String> getRepositories(String user) throws IOException, IllegalAccessException {
         List<GHRepository> repositories = fetchRepoFromGit(user);
-        List<GitRepository> gitRepositoryList = parsingResponse(repositories);
-        gitRepositoryList.forEach(mongoTemplate::save);
-        return gitRepositoryList;
+        List<GitRepo> gitRepoList = parsingResponse(repositories);
+        System.out.println("Parsing done.");
+//        gitRepoList.forEach(mongoTemplate::save);
+        List<String> serializedData = new ArrayList<>();
+        for (GitRepo repo:gitRepoList){
+//            System.out.println(repo);
+            String serialized = String.valueOf(repo.toByteString());
+            System.out.println(serialized);
+            serializedData.add(serialized);
+        }
+        return serializedData;
     }
 
     public GitRepository publishRepository(String owner, String repoName, String description) throws IOException {

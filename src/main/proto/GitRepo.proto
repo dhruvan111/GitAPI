@@ -1,11 +1,8 @@
 syntax = "proto3";
 
-<<<<<<<< HEAD:build/resources/main/GitRepository.proto
-========
 package model;
 option java_multiple_files = true;
 
->>>>>>>> v1.1.0:build/resources/main/GitRepo.proto
 message GitRepo{
   int64 id = 1;
   string owner = 2;

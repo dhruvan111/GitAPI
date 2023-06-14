@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.model.GitRepository;
 import com.example.service.GitHubService;
 import com.example.service.MongoService;
+import model.GitRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +23,15 @@ public class GitHubController {
         this.mongoService = mongoService;
     }
 
+    @GetMapping("/fun")
+    public String fun(){
+        System.out.println("Hello fun");
+        return "Hello fun";
+    }
+
     // GitHub API call operations
     @GetMapping("/git/{owner}")
-    public List<GitRepository> getRepositories(@PathVariable String owner) throws IOException {
+    public List<String> getRepositories(@PathVariable String owner) throws IOException, IllegalAccessException {
         return gitHubService.getRepositories(owner);
     }
 
